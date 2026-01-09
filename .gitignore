@@ -1,0 +1,106 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.env
+.venv
+venv/
+ENV/
+
+# =====================
+# Jupyter / notebooks
+# =====================
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# =====================
+# Editors & IDEs
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.txt
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+
+
+# =====================
+# Scientific / HPC outputs
+# =====================
+*.vtk
+*.vtu
+*.h5
+*.hdf5
+*.nc
+*.npy
+*.npz
+*.mat
+*.semv
+*.bin
+
+# =====================
+# CUDA / compiled code
+# =====================
+*.o
+*.a
+*.cu.o
+*.ptx
+*.cubin
+
+# =====================
+# Temporary data
+# =====================
+tmp/
+temp/
+.cache/
+
+# =====================
+# LaTeX (if you write papers/reports)
+# =====================
+*.aux
+*.bbl
+*.blg
+*.lof
+*.lot
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# =====================
+# Images
+# =====================
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.webp
+*.ps
+*.pdf
+
+
+# =====================
+# MPI / profiling
+# =====================
+*.rank
+*.prof
+
