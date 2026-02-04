@@ -310,9 +310,12 @@ class SeismicModel(GenericModel):
         b = kwargs.get('b', 1)
 
         # Initialize curvilinear sacle factors
-        if 'hxi' in kwargs: self.hxi = self._gen_phys_param(kwargs.pop('hxi'), 'hxi', space_order)
-        if 'heta' in kwargs: self.heta = self._gen_phys_param(kwargs.pop('heta'), 'heta', space_order)
-        if 'hzi' in kwargs: self.hzi = self._gen_phys_param(kwargs.pop('hzi'), 'hzi', space_order)
+        if 'hxi' in kwargs: self.hxi = self._gen_phys_param(kwargs.pop('hxi'), 'hxi', space_order,
+                                            is_param=True)
+        if 'heta' in kwargs: self.heta = self._gen_phys_param(kwargs.pop('heta'), 'heta', space_order,
+                                            is_param=True)
+        if 'hzi' in kwargs: self.hzi = self._gen_phys_param(kwargs.pop('hzi'), 'hzi', space_order,
+                                            is_param=True)
 
         # Initialize elastic with Lame parametrization
     

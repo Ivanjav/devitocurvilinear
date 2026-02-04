@@ -1,5 +1,128 @@
 import numpy as np
 
+def deriv1_8th(f, h, axis=-1):
+    """
+    8th-order accurate first derivative df/dx along `axis`.
+    Requires at least 9 points along that axis.
+
+    Interior: 8th-order centered (9-point)
+    First 4 points: 8th-order forward one-sided
+    Last 4 points: 8th-order backward one-sided
+    """
+    f = np.asarray(f)
+    df = np.empty_like(f, dtype=np.result_type(f, np.float64))
+
+    g  = np.moveaxis(f,  axis, -1)
+    dg = np.moveaxis(df, axis, -1)
+
+    n = g.shape[-1]
+    if n < 9:
+        raise ValueError("Need at least 9 points for 8th-order derivative.")
+
+    # ---------- interior (i = 4 .. n-5): 8th-order centered ----------
+    # weights for offsets [-4,-3,-2,-1,0,+1,+2,+3,+4] divided by h
+    # [ 1/280, -4/105, 1/5, -4/5, 0, 4/5, -1/5, 4/105, -1/280 ] / h
+    dg[..., 4:-4] = (
+        ( 1/280)*g[..., 0:-8] +
+        (-4/105)*g[..., 1:-7] +
+        ( 1/5  )*g[..., 2:-6] +
+        (-4/5  )*g[..., 3:-5] +
+        ( 4/5  )*g[..., 5:-3] +
+        (-1/5  )*g[..., 6:-2] +
+        ( 4/105)*g[..., 7:-1] +
+        (-1/280)*g[..., 8:   ]
+    ) / h
+
+    # ---------- left boundary: i = 0,1,2,3 (8th-order forward, points 0..8) ----------
+    # i=0
+    dg[..., 0] = (
+        (-761/280)*g[..., 0] + 8*g[..., 1] - 14*g[..., 2] + (56/3)*g[..., 3]
+        + (-35/2)*g[..., 4] + (56/5)*g[..., 5] + (-14/3)*g[..., 6]
+        + (8/7)*g[..., 7] + (-1/8)*g[..., 8]
+    ) / h
+    # i=1
+    dg[..., 1] = (
+        (-1/8)*g[..., 0] + (-223/140)*g[..., 1] + (7/2)*g[..., 2] + (-7/2)*g[..., 3]
+        + (35/12)*g[..., 4] + (-7/4)*g[..., 5] + (7/10)*g[..., 6]
+        + (-1/6)*g[..., 7] + (1/56)*g[..., 8]
+    ) / h
+    # i=2
+    dg[..., 2] = (
+        (1/56)*g[..., 0] + (-2/7)*g[..., 1] + (-19/20)*g[..., 2] + 2*g[..., 3]
+        + (-5/4)*g[..., 4] + (2/3)*g[..., 5] + (-1/4)*g[..., 6]
+        + (2/35)*g[..., 7] + (-1/168)*g[..., 8]
+    ) / h
+    # i=3
+    dg[..., 3] = (
+        (-1/168)*g[..., 0] + (1/14)*g[..., 1] + (-1/2)*g[..., 2] + (-9/20)*g[..., 3]
+        + (5/4)*g[..., 4] + (-1/2)*g[..., 5] + (1/6)*g[..., 6]
+        + (-1/28)*g[..., 7] + (1/280)*g[..., 8]
+    ) / h
+
+    # ---------- right boundary: i = n-4, n-3, n-2, n-1 (8th-order backward, points n-9..n-1) ----------
+    # Use the same coefficients as above but applied to the last 9 points.
+    s = slice(n-9, n)  # last 9 indices
+
+    # i=n-4 corresponds to local i=5 in the 0..8 stencil
+    dg[..., -4] = (
+        (-1/280)*g[..., s][..., 0] + (1/28)*g[..., s][..., 1] + (-1/6)*g[..., s][..., 2]
+        + (1/2)*g[..., s][..., 3] + (-5/4)*g[..., s][..., 4] + (9/20)*g[..., s][..., 5]
+        + (1/2)*g[..., s][..., 6] + (-1/14)*g[..., s][..., 7] + (1/168)*g[..., s][..., 8]
+    ) / h
+    # i=n-3 local i=6
+    dg[..., -3] = (
+        (1/168)*g[..., s][..., 0] + (-2/35)*g[..., s][..., 1] + (1/4)*g[..., s][..., 2]
+        + (-2/3)*g[..., s][..., 3] + (5/4)*g[..., s][..., 4] + (-2)*g[..., s][..., 5]
+        + (19/20)*g[..., s][..., 6] + (2/7)*g[..., s][..., 7] + (-1/56)*g[..., s][..., 8]
+    ) / h
+    # i=n-2 local i=7
+    dg[..., -2] = (
+        (-1/56)*g[..., s][..., 0] + (1/6)*g[..., s][..., 1] + (-7/10)*g[..., s][..., 2]
+        + (7/4)*g[..., s][..., 3] + (-35/12)*g[..., s][..., 4] + (7/2)*g[..., s][..., 5]
+        + (-7/2)*g[..., s][..., 6] + (223/140)*g[..., s][..., 7] + (1/8)*g[..., s][..., 8]
+    ) / h
+    # i=n-1 local i=8
+    dg[..., -1] = (
+        (1/8)*g[..., s][..., 0] + (-8/7)*g[..., s][..., 1] + (14/3)*g[..., s][..., 2]
+        + (-56/5)*g[..., s][..., 3] + (35/2)*g[..., s][..., 4] + (-56/3)*g[..., s][..., 5]
+        + 14*g[..., s][..., 6] + (-8)*g[..., s][..., 7] + (761/280)*g[..., s][..., 8]
+    ) / h
+
+    return df
+
+
+def deriv1_4th(f, h, axis=-1):
+    """
+    4th-order accurate first derivative df/dx along `axis`.
+    Uses:
+      - 4th-order central in the interior
+      - 4th-order one-sided on the first 2 and last 2 points
+    """
+    f = np.asarray(f)
+    df = np.empty_like(f, dtype=np.result_type(f, np.float64))
+
+    # move axis to last for easier slicing
+    g = np.moveaxis(f, axis, -1)
+    dg = np.moveaxis(df, axis, -1)
+
+    n = g.shape[-1]
+    if n < 5:
+        raise ValueError("Need at least 5 points for 4th-order derivative.")
+
+    # Interior: i=2..n-3
+    dg[..., 2:-2] = (-g[..., 4:] + 8*g[..., 3:-1] - 8*g[..., 1:-3] + g[..., :-4]) / (12*h)
+
+    # Left boundary: i=0,1 (4th-order forward)
+    dg[..., 0] = (-25*g[..., 0] + 48*g[..., 1] - 36*g[..., 2] + 16*g[..., 3] - 3*g[..., 4]) / (12*h)
+    dg[..., 1] = (-3*g[..., 0] - 10*g[..., 1] + 18*g[..., 2] - 6*g[..., 3] + g[..., 4]) / (12*h)
+
+    # Right boundary: i=n-2,n-1 (4th-order backward)
+    dg[..., -2] = (-g[..., -5] + 6*g[..., -4] - 18*g[..., -3] + 10*g[..., -2] + 3*g[..., -1]) / (12*h)
+    dg[..., -1] = (3*g[..., -5] - 16*g[..., -4] + 36*g[..., -3] - 48*g[..., -2] + 25*g[..., -1]) / (12*h)
+
+    return df
+
+
 def stretch_eta_sinh(n_eta, H, beta=0.0):
     s = np.linspace(0.0, 1.0, n_eta)
     if beta == 0.0:
@@ -176,7 +299,8 @@ def mapping_velocity(vp, dx, dz, X, Z):
         # return_indices=True returns a tuple of index arrays you can use to pick values
         nearest_idx = distance_transform_edt(mask_invalid, return_distances=False, return_indices=True)
         vp_filled = vp.copy()
-        vp_filled[mask_invalid] = vp[tuple(nearest_idx)][mask_invalid]
+        #vp_filled[mask_invalid] = vp[tuple(nearest_idx)][mask_invalid]
+        vp_filled[mask_invalid] = vp[nearest_idx[0][mask_invalid], nearest_idx[1][mask_invalid]]
     else:
         vp_filled = vp
 
@@ -294,8 +418,10 @@ class CurviMap:
         dxi  = xi[1]  - xi[0]
 
         # 2) metric terms on grid
-        x_eta, x_xi = np.gradient(self.X, deta, dxi, edge_order=2)
-        z_eta, z_xi = np.gradient(self.Z, deta, dxi, edge_order=2)
+        x_eta = deriv1_8th(self.X, deta, axis=0)
+        x_xi  = deriv1_8th(self.X, dxi,  axis=1)
+        z_eta = deriv1_8th(self.Z, deta, axis=0)
+        z_xi  = deriv1_8th(self.Z, dxi,  axis=1)
         h_xi  = np.sqrt(x_xi**2 + z_xi**2)
         h_eta = np.sqrt(x_eta**2 + z_eta**2)
 
