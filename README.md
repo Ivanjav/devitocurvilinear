@@ -1,6 +1,6 @@
 # devitocurvilinear
 
-Finite-difference elastodynamic simulations in curvilinear coordinates, focused on complex topography.
+Finite-difference in orthogonal curvilinear coordinates (FD-OCC) for elastodynamic simulations with complex topography.
 
 This repository contains:
 - a Python package (`devitocurvilinear`) for curvilinear grid generation/mapping and model setup,
