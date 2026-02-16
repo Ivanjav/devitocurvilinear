@@ -2,9 +2,9 @@
  C  TMIN         TMAX         NTSTP
  0.00000000E+00  1.5          10000
  C  DELAY        FP           ZS
-    1E-01        10.00        10.
+    1E-01        10.00        20.
  C  XREC      ZREC     DXR     DZR      NREC
-    100.0     0.0     100.0   0.0      20                        
+    100.0     0.0     10.0   0.0      191                       
  C  CP           CS
     2500.000     1300.00000
  C  ITRACE(1)    ITRACE(2)    ITRACE(3)
